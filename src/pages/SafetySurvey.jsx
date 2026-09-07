@@ -1,28 +1,29 @@
+// src/pages/SafetySurvey.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { addExpense, addSurveyResponse } from '../lib/storage';
+import { addExpense, addSurveyResponse, getExpenses, setExpenses } from '../lib/storage';
 import SurveyQuestion from '../components/SurveyQuestion';
 
 const SURVEY_QUESTIONS = [
   {
     id: 'paidRides',
     text: 'In a typical month, how many times do you take a paid ride instead of walking or transit because it felt unsafe?',
-    costPerInstance: 250, // Updated realistic cost
+    costPerInstance: 100,
   },
   {
     id: 'earlyExits',
     text: 'How many times a month do you leave somewhere earlier, or pay for a faster/safer way back, to avoid being out late?',
-    costPerInstance: 150,
+    costPerInstance: 60,
   },
   {
     id: 'skippedDeals',
     text: 'How many times a month do you skip a cheaper option because getting there/back safely felt like too much hassle or cost?',
-    costPerInstance: 100,
+    costPerInstance: 50,
   },
   {
     id: 'safetyItems',
-    text: 'How many times a month do you buy something specifically for personal safety (alarm, pepper spray, extra recharge)?',
-    costPerInstance: 350,
+    text: 'How many times a month do you buy something specifically for personal safety (alarm, pepper spray, extra recharge for location sharing)?',
+    costPerInstance: 80,
   },
   {
     id: 'saferHousingPremium',
@@ -38,7 +39,6 @@ const SURVEY_QUESTIONS = [
 
 export default function SafetySurvey() {
   const [answers, setAnswers] = useState({});
-  const [monthlyIncome, setMonthlyIncome] = useState('');
   const [result, setResult] = useState(null);
   const navigate = useNavigate();
 
@@ -58,22 +58,16 @@ export default function SafetySurvey() {
   function handleSubmit(e) {
     e.preventDefault();
     const premium = calculatePremium();
-    const incomeNum = Number(monthlyIncome) || 0;
-    const percentage = incomeNum > 0 ? ((premium / incomeNum) * 100).toFixed(1) : 0;
+    setResult(premium);
+    addSurveyResponse({ answers, computedPremium: premium });
 
-    const resultData = {
-      amount: premium,
-      income: incomeNum,
-      percentage: percentage,
-    };
-
-    setResult(resultData);
-
-    addSurveyResponse({ answers, computedPremium: premium, income: incomeNum });
+    // Replace any previous survey-computed entry instead of piling up duplicates
+    const filtered = getExpenses().filter((exp) => exp.note !== 'Safety premium (from survey)');
+    setExpenses(filtered);
     addExpense({
       amount: premium,
       category: 'safety',
-      note: `Safety premium (${percentage}% of monthly income)`,
+      note: 'Safety premium (from survey)',
       month: new Date().toLocaleString('default', { month: 'long' }),
     });
   }
@@ -81,24 +75,9 @@ export default function SafetySurvey() {
   return (
     <div className="safety-survey-page">
       <h1>Your Safety Premium</h1>
+      <p>Every rupee here is money you spend purely to stay safe — a ride instead of a walk, leaving early instead of staying out. It's real spending, but it never shows up as its own line item. Answering honestly turns it into a number you can actually plan around.</p>
       <p>Answer honestly — there's no "too much" or "too little" here.</p>
-
       <form onSubmit={handleSubmit}>
-        {/* Income Input Section */}
-        <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-          <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '0.5rem' }}>
-            What is your approximate net monthly income / allowance (₹)?
-          </label>
-          <input
-            type="number"
-            placeholder="e.g. 30000"
-            value={monthlyIncome}
-            onChange={(e) => setMonthlyIncome(e.target.value)}
-            required
-            style={{ width: '100%', padding: '0.5rem', fontSize: '1rem' }}
-          />
-        </div>
-
         {SURVEY_QUESTIONS.map((q) => (
           <SurveyQuestion
             key={q.id}
@@ -107,18 +86,12 @@ export default function SafetySurvey() {
             onChange={handleChange}
           />
         ))}
-
         <button type="submit">Calculate my safety premium</button>
       </form>
 
       {result !== null && (
-        <div className="survey-result" style={{ marginTop: '2rem', padding: '1rem', border: '1px solid #ccc' }}>
-          <h2>Your estimated monthly safety premium: ₹{result.amount}</h2>
-          {result.income > 0 && (
-            <p style={{ fontSize: '1.2rem', color: '#d9534f', fontWeight: 'bold' }}>
-              You are spending <span>{result.percentage}%</span> of your monthly income on safety alone!
-            </p>
-          )}
+        <div className="survey-result">
+          <h2>Your estimated monthly safety premium: ₹{result}</h2>
           <p>This has been added to your expense tracker under "safety."</p>
           <button onClick={() => navigate('/stash')}>See your stash suggestion</button>
         </div>
