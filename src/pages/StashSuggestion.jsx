@@ -1,22 +1,34 @@
-   // src/pages/StashSuggestion.jsx
+// src/pages/StashSuggestion.jsx
 import { useState, useEffect } from 'react';
-import { getExpenses } from '../lib/storage';
+import { getExpenses, getIncome, getStashSaved, setStashSaved } from '../lib/storage';
 import StashCard from '../components/StashCard';
 
-function getSafetyPremium(expenses) {
-  return expenses.filter((e) => e.category === 'safety').reduce((sum, e) => sum + e.amount, 0);
+function totalFor(expenses, category) {
+  return expenses.filter((e) => e.category === category).reduce((sum, e) => sum + e.amount, 0);
 }
 
 export default function StashSuggestion() {
-  const [expenses, setExpenses] = useState([]);
+  const [expenses, setExpensesState] = useState([]);
+  const [income, setIncomeState] = useState(0);
+  const [saved, setSavedState] = useState(0);
 
   useEffect(() => {
-    setExpenses(getExpenses());
+    setExpensesState(getExpenses());
+    setIncomeState(getIncome());
+    setSavedState(getStashSaved());
   }, []);
 
-  const safetyPremium = getSafetyPremium(expenses);
+  const mandatory = totalFor(expenses, 'mandatory');
+  const academic = totalFor(expenses, 'academic');
+  const safetyPremium = totalFor(expenses, 'safety');
+  const totalExpenses = mandatory + academic + safetyPremium;
+  const remaining = income - totalExpenses;
   const stashTarget = safetyPremium * 3;
-  const weeklySetAside = stashTarget > 0 ? stashTarget / 12 : 0;
+
+  function handleSaveUpdate(amount) {
+    setStashSaved(amount);
+    setSavedState(amount);
+  }
 
   return (
     <div className="stash-suggestion-page">
@@ -28,7 +40,13 @@ export default function StashSuggestion() {
         <StashCard
           safetyPremium={safetyPremium}
           stashTarget={stashTarget}
-          weeklySetAside={weeklySetAside}
+          income={income}
+          mandatory={mandatory}
+          academic={academic}
+          totalExpenses={totalExpenses}
+          remaining={remaining}
+          saved={saved}
+          onSaveUpdate={handleSaveUpdate}
         />
       )}
     </div>

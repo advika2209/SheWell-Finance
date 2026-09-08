@@ -335,3 +335,79 @@ button:active {
     font-size: 1.6rem;
     margin-bottom: 1.5rem;
 }
+.stash-section {
+  margin-bottom: 1.75rem;
+}
+.stash-section:last-child {
+  margin-bottom: 0;
+}
+.stash-section h3 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+.stash-formula {
+  font-weight: 700;
+  font-size: 1.1rem;
+  color: #0D9488;
+  background: #F0FDFA;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+.stash-context-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.stash-context-list li {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #F3F4F6;
+  font-size: 0.9rem;
+}
+.stash-context-total {
+  font-weight: 700;
+  border-top: 2px solid #E5E7EB;
+  border-bottom: none !important;
+  margin-top: 0.25rem;
+  padding-top: 0.6rem !important;
+}
+.stash-pace-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+.stash-pace-table th, .stash-pace-table td {
+  text-align: left;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #F3F4F6;
+}
+.stash-pace-table th {
+  color: #6B7280;
+  font-weight: 600;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+}
+.stash-progress-bar {
+  background: #F3F4F6;
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+  margin-bottom: 0.5rem;
+}
+.stash-progress-fill {
+  background: #0D9488;
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.3s ease;
+}
+.stash-saved-form {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.75rem;
+  margin-top: 0.75rem;
+}
+.stash-saved-form label {
+  flex: 1;
+}
